@@ -1,0 +1,15 @@
+# ============================================
+# BACTERIAL MEMBRANE (E. coli-like)
+# ============================================
+# PE-rich with anionic PG lipids
+# ============================================
+
+box_x = 80.0
+box_y = 80.0
+box_z = 120.0
+
+POPE = 56, 56
+POPG = 24, 24
+
+output_dir = Outputs/bacterial
+output_name = ecoli_membrane

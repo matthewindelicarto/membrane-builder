@@ -1,0 +1,41 @@
+# ============================================
+# MEMBRANE BUILDER - CONFIGURATION FILE
+# ============================================
+# Edit this file, then run: python run.py
+# ============================================
+
+# --- BOX DIMENSIONS (Angstroms) ---
+box_x = 80.0
+box_y = 80.0
+box_z = 120.0
+
+# --- LIPID COMPOSITION ---
+# Format: LIPID_NAME = top_leaflet, bottom_leaflet
+# Available lipids: POPC, DPPC, DOPC, DMPC, POPE, DOPE, POPS, DOPS,
+#                   POPG, DOPG, PSM, SSM, CHOL, ERGO, POPI, TOCL
+
+POPC = 64, 64
+# POPE = 16, 16
+# CHOL = 32, 32
+# POPS = 0, 8
+
+# --- PHYSICAL PARAMETERS ---
+# Bending modulus in kT (leave blank to auto-calculate from composition)
+bending_modulus =
+
+# Temperature in Kelvin
+temperature = 310.15
+
+# --- PACKING PARAMETERS ---
+# Minimum distance between lipid anchors (Angstroms)
+min_anchor_distance = 6.5
+
+# Random seed for reproducibility
+seed = 12345
+
+# --- OUTPUT ---
+# Output directory
+output_dir = Outputs
+
+# Output filename (without extension)
+output_name = membrane

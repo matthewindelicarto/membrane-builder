@@ -1,0 +1,16 @@
+MEMBRANE BUILDER REPORT
+========================================
+
+Box: 80.0 x 80.0 x 120.0 A
+
+Composition:
+  POPC: 64 top, 64 bottom
+
+Total lipids: 128
+Total atoms: 5760
+
+Physical Properties:
+  Bending modulus:  20.00 kT
+  Thickness:        36.5 A
+  Area per lipid:   68.3 A^2
+  Net charge:       +0 e

@@ -1,0 +1,21 @@
+# ============================================
+# PLASMA MEMBRANE MODEL
+# ============================================
+# Asymmetric composition mimicking mammalian
+# plasma membrane
+# ============================================
+
+box_x = 100.0
+box_y = 100.0
+box_z = 120.0
+
+# Outer leaflet: PC, SM, CHOL
+# Inner leaflet: PE, PS, CHOL
+POPC = 50, 20
+PSM = 20, 0
+POPE = 0, 40
+POPS = 0, 20
+CHOL = 30, 30
+
+output_dir = Outputs/plasma_membrane
+output_name = plasma_membrane

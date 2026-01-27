@@ -1,0 +1,59 @@
+Membrane Permeability Analysis
+------------------------------------------------------------
+
+Membrane composition: {'POPC': 128}
+Membrane type: BLM
+
+Results summary
+------------------------------------------------------------
+Molecule             log P        P (cm/s)        Class
+------------------------------------------------------------
+water               -10.09        8.09e-11          low
+ethanol              -9.11        7.82e-10          low
+glucose             -10.93        1.18e-11          low
+caffeine            -10.65        2.22e-11          low
+aspirin             -10.74        1.81e-11          low
+
+------------------------------------------------------------
+
+Detailed results
+
+water
+  Molecular weight: 18.0 Da
+  Accessible surface area: 40 Å²
+  log P: -10.09
+  Permeability: 8.09e-11 cm/s
+  Membrane-bound energy: 21.0 kJ/mol
+  Binding position: -15.0 Å from center
+
+ethanol
+  Molecular weight: 46.1 Da
+  Accessible surface area: 80 Å²
+  log P: -9.11
+  Permeability: 7.82e-10 cm/s
+  Membrane-bound energy: 14.5 kJ/mol
+  Binding position: -15.0 Å from center
+
+glucose
+  Molecular weight: 180.2 Da
+  Accessible surface area: 180 Å²
+  log P: -10.93
+  Permeability: 1.18e-11 cm/s
+  Membrane-bound energy: 74.2 kJ/mol
+  Binding position: -15.0 Å from center
+
+caffeine
+  Molecular weight: 194.2 Da
+  Accessible surface area: 150 Å²
+  log P: -10.65
+  Permeability: 2.22e-11 cm/s
+  Membrane-bound energy: 20.1 kJ/mol
+  Binding position: -15.0 Å from center
+
+aspirin
+  Molecular weight: 180.2 Da
+  Accessible surface area: 140 Å²
+  log P: -10.74
+  Permeability: 1.81e-11 cm/s
+  Membrane-bound energy: 33.0 kJ/mol
+  Binding position: -15.0 Å from center

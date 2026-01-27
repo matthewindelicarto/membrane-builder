@@ -1,0 +1,28 @@
+# Inputs/build_phase1.yaml
+project: phase1_popc_bilayer
+
+box:
+  Lx: 80.0   # Å
+  Ly: 80.0   # Å
+  Lz: 120.0  # Å
+
+leaflets:
+  z_top: 18.0     # Å (headgroup plane)
+  z_bottom: -18.0 # Å
+
+lipids:
+  POPC:
+    path: "Lipids/popc/conf1"   # where your .crd files live
+    file_glob: "popc_*.crd"
+    count_top: 64
+    count_bottom: 64
+
+packing:
+  min_anchor_dist: 6.5   # Å (anchor-anchor minimum distance)
+  jitter: 2.0            # Å random in-plane jitter on a grid
+
+output:
+  out_dir: "Outputs/phase1_popc"
+  write_gro: true
+  write_pdb: true
+
