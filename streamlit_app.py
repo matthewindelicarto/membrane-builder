@@ -244,13 +244,13 @@ with col1:
         st.markdown("**Box Dimensions**")
 
         # Auto-calculate toggle
-        auto_calc = st.checkbox("Auto-calculate from APL", value=True)
+        auto_calc = st.checkbox("Auto-calculate from Area per Lipid", value=True)
 
         if auto_calc:
             box_x = suggested_x
             box_y = suggested_y
             st.caption(f"Suggested: {suggested_x} x {suggested_y} A")
-            st.caption(f"Effective APL: {effective_apl:.1f} A^2")
+            st.caption(f"Effective Area per Lipid: {effective_apl:.1f} A^2")
             if chol_pct > 5:
                 st.caption(f"Cholesterol: {chol_pct:.0f}% (condensation applied)")
         else:
@@ -348,12 +348,12 @@ with col1:
 
     c1, c2 = st.columns(2)
     with c1:
-        mol_mw = st.number_input("MW", value=mol_mw, min_value=1)
-        mol_hbd = st.number_input("HBD", value=mol_hbd, min_value=0)
+        mol_mw = st.number_input("Molecular Weight", value=mol_mw, min_value=1)
+        mol_hbd = st.number_input("H-Bond Donors", value=mol_hbd, min_value=0)
         mol_charge = st.number_input("Charge", value=float(mol_charge), step=0.1)
     with c2:
-        mol_asa = st.number_input("ASA (A^2)", value=mol_asa, min_value=1)
-        mol_hba = st.number_input("HBA", value=mol_hba, min_value=0)
+        mol_asa = st.number_input("Surface Area (A^2)", value=mol_asa, min_value=1)
+        mol_hba = st.number_input("H-Bond Acceptors", value=mol_hba, min_value=0)
         pka_input = st.text_input("pKa", value=str(mol_pka) if mol_pka else "")
 
     if st.button("Calculate Permeability", type="primary", use_container_width=True):
