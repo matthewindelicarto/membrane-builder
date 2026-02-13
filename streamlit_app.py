@@ -253,11 +253,10 @@ def render_tpu_3dmol(atoms, carbosil_frac, style):
 # ============== PERMEABILITY VISUALIZATION ==============
 
 def render_lipid_permeability_3dmol(pdb_data, mol_name, permeability, n_molecules=15):
-    """Render lipid membrane with animated molecules using CSS animations"""
+    """Render lipid membrane with animated molecules using JavaScript"""
     # Speed based on permeability (log scale)
     log_p = np.log10(permeability) if permeability > 0 else -10
-    # Map log_p from [-12, -4] to duration [8s, 2s] (higher permeability = faster = shorter duration)
-    duration = max(2, min(10, 10 - (log_p + 12) / 8 * 8))
+    speed = max(0.5, min(4.0, (log_p + 12) / 8 * 3.5 + 0.5))
 
     mol_colors = {
         "water": "#3498db", "ethanol": "#9b59b6", "caffeine": "#8B4513",
@@ -265,101 +264,60 @@ def render_lipid_permeability_3dmol(pdb_data, mol_name, permeability, n_molecule
     }
     color = mol_colors.get(mol_name.lower(), "#1abc9c")
 
-    # Generate molecule divs with staggered delays
-    np.random.seed(42)
-    molecule_divs = ""
-    for i in range(n_molecules):
-        left = np.random.uniform(15, 85)
-        delay = np.random.uniform(0, duration)
-        size = np.random.uniform(8, 14)
-        molecule_divs += f'<div class="mol-lipid" style="left:{left}%;animation-delay:-{delay:.1f}s;width:{size}px;height:{size}px;"></div>'
-
-    html = f"""<!DOCTYPE html>
-<html>
-<head>
-<style>
-html, body {{
-    margin: 0;
-    padding: 0;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-}}
-.perm-box {{
-    width: 100%;
-    height: 400px;
-    position: relative;
-    overflow: hidden;
-    background: #1a1a1a;
-    border-radius: 8px;
-}}
-.mem-zone {{
-    position: absolute;
-    top: 35%;
-    left: 0;
-    right: 0;
-    height: 30%;
-    background: linear-gradient(180deg,
-        rgba(100,150,100,0.3) 0%,
-        rgba(80,120,80,0.5) 20%,
-        rgba(60,100,60,0.6) 50%,
-        rgba(80,120,80,0.5) 80%,
-        rgba(100,150,100,0.3) 100%);
-}}
-.mem-lbl {{
-    position: absolute;
-    top: 48%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    color: rgba(255,255,255,0.4);
-    font-size: 14px;
-    font-family: Arial, sans-serif;
-}}
-.mol-lipid {{
-    position: absolute;
-    top: -20px;
-    background: {color};
-    border-radius: 50%;
-    box-shadow: 0 0 10px {color}, 0 0 20px {color}40;
-    animation: falllipid {duration}s linear infinite;
-}}
-@keyframes falllipid {{
-    0% {{ top: -20px; opacity: 0.9; }}
-    35% {{ opacity: 0.7; }}
-    50% {{ opacity: 0.5; }}
-    65% {{ opacity: 0.7; }}
-    100% {{ top: 420px; opacity: 0.9; }}
-}}
-.lbl-top, .lbl-bot {{
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    color: rgba(255,255,255,0.5);
-    font-size: 12px;
-    font-family: Arial, sans-serif;
-}}
-.lbl-top {{ top: 10px; }}
-.lbl-bot {{ bottom: 10px; }}
-</style>
-</head>
-<body>
-<div class="perm-box">
-    <div class="lbl-top">Extracellular</div>
-    <div class="mem-zone"></div>
-    <div class="mem-lbl">Lipid Bilayer</div>
-    {molecule_divs}
-    <div class="lbl-bot">Intracellular</div>
+    html = f"""
+<div id="container" style="width:100%;height:400px;background:#1a1a1a;border-radius:8px;position:relative;overflow:hidden;">
+    <div style="position:absolute;top:10px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,0.5);font-size:12px;font-family:Arial;">Extracellular</div>
+    <div style="position:absolute;top:35%;left:0;right:0;height:30%;background:linear-gradient(180deg,rgba(100,150,100,0.3),rgba(60,100,60,0.6),rgba(100,150,100,0.3));"></div>
+    <div style="position:absolute;top:48%;left:50%;transform:translate(-50%,-50%);color:rgba(255,255,255,0.4);font-size:14px;font-family:Arial;">Lipid Bilayer</div>
+    <div style="position:absolute;bottom:10px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,0.5);font-size:12px;font-family:Arial;">Intracellular</div>
 </div>
-</body>
-</html>"""
+<script>
+(function(){{
+    var container = document.getElementById('container');
+    var molecules = [];
+    var numMols = {n_molecules};
+    var speed = {speed};
+    var color = '{color}';
+
+    for(var i=0; i<numMols; i++){{
+        var mol = document.createElement('div');
+        var size = 8 + Math.random()*6;
+        mol.style.cssText = 'position:absolute;border-radius:50%;background:'+color+';box-shadow:0 0 10px '+color+';width:'+size+'px;height:'+size+'px;';
+        mol.x = 15 + Math.random()*70;
+        mol.y = Math.random()*420;
+        mol.style.left = mol.x + '%';
+        mol.style.top = mol.y + 'px';
+        container.appendChild(mol);
+        molecules.push(mol);
+    }}
+
+    function animate(){{
+        for(var i=0; i<molecules.length; i++){{
+            var mol = molecules[i];
+            mol.y += speed;
+            if(mol.y > 420) mol.y = -20;
+            mol.style.top = mol.y + 'px';
+
+            // Fade in membrane region
+            if(mol.y > 140 && mol.y < 260){{
+                mol.style.opacity = '0.5';
+            }} else {{
+                mol.style.opacity = '0.9';
+            }}
+        }}
+        requestAnimationFrame(animate);
+    }}
+    animate();
+}})();
+</script>
+"""
     components.html(html, height=420)
 
 def render_tpu_permeability_3dmol(atoms, carbosil_frac, mol_name, permeability, n_molecules=12):
-    """Render TPU membrane with animated molecules using CSS animations"""
+    """Render TPU membrane with animated molecules using JavaScript"""
     # Speed based on permeability (log scale)
     log_p = np.log10(permeability) if permeability > 0 else -10
-    # Map log_p from [-12, -4] to duration [8s, 2s] (higher permeability = faster = shorter duration)
-    duration = max(2, min(10, 10 - (log_p + 12) / 8 * 8))
+    speed = max(0.5, min(4.0, (log_p + 12) / 8 * 3.5 + 0.5))
 
     mol_colors = {
         "oxygen": "#3498db", "glucose": "#f39c12",
@@ -367,93 +325,53 @@ def render_tpu_permeability_3dmol(atoms, carbosil_frac, mol_name, permeability, 
     }
     color = mol_colors.get(mol_name.lower(), "#1abc9c")
 
-    # Generate molecule divs with staggered delays
-    np.random.seed(42)
-    molecule_divs = ""
-    for i in range(n_molecules):
-        left = np.random.uniform(15, 85)
-        delay = np.random.uniform(0, duration)
-        size = np.random.uniform(6, 12)
-        molecule_divs += f'<div class="mol-tpu" style="left:{left}%;animation-delay:-{delay:.1f}s;width:{size}px;height:{size}px;"></div>'
-
-    html = f"""<!DOCTYPE html>
-<html>
-<head>
-<style>
-html, body {{
-    margin: 0;
-    padding: 0;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-}}
-.perm-box-tpu {{
-    width: 100%;
-    height: 400px;
-    position: relative;
-    overflow: hidden;
-    background: #1a1a1a;
-    border-radius: 8px;
-}}
-.mem-zone-tpu {{
-    position: absolute;
-    top: 35%;
-    left: 0;
-    right: 0;
-    height: 30%;
-    background: linear-gradient(180deg,
-        rgba(100,100,150,0.3) 0%,
-        rgba(80,80,130,0.5) 20%,
-        rgba(60,60,110,0.6) 50%,
-        rgba(80,80,130,0.5) 80%,
-        rgba(100,100,150,0.3) 100%);
-}}
-.mem-lbl-tpu {{
-    position: absolute;
-    top: 48%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    color: rgba(255,255,255,0.4);
-    font-size: 14px;
-    font-family: Arial, sans-serif;
-}}
-.mol-tpu {{
-    position: absolute;
-    top: -20px;
-    background: {color};
-    border-radius: 50%;
-    box-shadow: 0 0 10px {color}, 0 0 20px {color}40;
-    animation: falltpu {duration}s linear infinite;
-}}
-@keyframes falltpu {{
-    0% {{ top: -20px; opacity: 0.9; }}
-    35% {{ opacity: 0.7; }}
-    50% {{ opacity: 0.5; }}
-    65% {{ opacity: 0.7; }}
-    100% {{ top: 420px; opacity: 0.9; }}
-}}
-.lbl-top-tpu, .lbl-bot-tpu {{
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    color: rgba(255,255,255,0.5);
-    font-size: 12px;
-    font-family: Arial, sans-serif;
-}}
-.lbl-top-tpu {{ top: 10px; }}
-.lbl-bot-tpu {{ bottom: 10px; }}
-</style>
-</head>
-<body>
-<div class="perm-box-tpu">
-    <div class="lbl-top-tpu">External</div>
-    <div class="mem-zone-tpu"></div>
-    <div class="mem-lbl-tpu">TPU Membrane</div>
-    {molecule_divs}
-    <div class="lbl-bot-tpu">Internal</div>
+    html = f"""
+<div id="container_tpu" style="width:100%;height:400px;background:#1a1a1a;border-radius:8px;position:relative;overflow:hidden;">
+    <div style="position:absolute;top:10px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,0.5);font-size:12px;font-family:Arial;">External</div>
+    <div style="position:absolute;top:35%;left:0;right:0;height:30%;background:linear-gradient(180deg,rgba(100,100,150,0.3),rgba(60,60,110,0.6),rgba(100,100,150,0.3));"></div>
+    <div style="position:absolute;top:48%;left:50%;transform:translate(-50%,-50%);color:rgba(255,255,255,0.4);font-size:14px;font-family:Arial;">TPU Membrane</div>
+    <div style="position:absolute;bottom:10px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,0.5);font-size:12px;font-family:Arial;">Internal</div>
 </div>
-</body>
-</html>"""
+<script>
+(function(){{
+    var container = document.getElementById('container_tpu');
+    var molecules = [];
+    var numMols = {n_molecules};
+    var speed = {speed};
+    var color = '{color}';
+
+    for(var i=0; i<numMols; i++){{
+        var mol = document.createElement('div');
+        var size = 6 + Math.random()*6;
+        mol.style.cssText = 'position:absolute;border-radius:50%;background:'+color+';box-shadow:0 0 10px '+color+';width:'+size+'px;height:'+size+'px;';
+        mol.x = 15 + Math.random()*70;
+        mol.y = Math.random()*420;
+        mol.style.left = mol.x + '%';
+        mol.style.top = mol.y + 'px';
+        container.appendChild(mol);
+        molecules.push(mol);
+    }}
+
+    function animate(){{
+        for(var i=0; i<molecules.length; i++){{
+            var mol = molecules[i];
+            mol.y += speed;
+            if(mol.y > 420) mol.y = -20;
+            mol.style.top = mol.y + 'px';
+
+            // Fade in membrane region
+            if(mol.y > 140 && mol.y < 260){{
+                mol.style.opacity = '0.5';
+            }} else {{
+                mol.style.opacity = '0.9';
+            }}
+        }}
+        requestAnimationFrame(animate);
+    }}
+    animate();
+}})();
+</script>
+"""
     components.html(html, height=420)
 
 # ============== MD SIMULATION HELPER FUNCTIONS ==============
