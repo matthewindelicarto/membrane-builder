@@ -657,7 +657,7 @@ with tab_lipid:
                     try:
                         config = MembraneConfig.create_simple(lipids=lipids, box_size=(float(box_x), float(box_y), 120.0))
                         builder = MembraneBuilder(seed=12345)
-                        membrane = builder.build(config, use_templates=True, templates_dir="lipids")
+                        membrane = builder.build(config, use_templates=True, templates_dir="Lipids")
                         st.session_state.pdb_data = membrane.to_pdb_string()
                         st.session_state.membrane_props = {
                             'thickness': round(membrane.properties.thickness, 1),
