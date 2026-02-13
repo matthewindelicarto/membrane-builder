@@ -762,24 +762,24 @@ with tab_lipid:
             auto_calc = st.checkbox("Auto-calculate from Area per Lipid", value=True)
             if auto_calc:
                 box_x, box_y = suggested_x, suggested_y
-                st.caption(f"Suggested: {suggested_x} x {suggested_y} A")
-                st.caption(f"Effective Area per Lipid: {effective_apl:.1f} A^2")
+                st.caption(f"Suggested: {suggested_x} x {suggested_y} Å")
+                st.caption(f"Effective Area per Lipid: {effective_apl:.1f} Å²")
                 if chol_pct > 5:
                     st.caption(f"Cholesterol: {chol_pct:.0f}% (condensation applied)")
             else:
                 c1, c2 = st.columns(2)
                 with c1:
-                    box_x = st.number_input("Box X (A)", value=suggested_x, min_value=40, max_value=200)
+                    box_x = st.number_input("Box X (Å)", value=suggested_x, min_value=40, max_value=200)
                 with c2:
-                    box_y = st.number_input("Box Y (A)", value=suggested_y, min_value=40, max_value=200)
+                    box_y = st.number_input("Box Y (Å)", value=suggested_y, min_value=40, max_value=200)
         else:
             st.divider()
             st.markdown("**Box Dimensions**")
             c1, c2 = st.columns(2)
             with c1:
-                box_x = st.number_input("Box X (A)", value=80, min_value=40, max_value=200)
+                box_x = st.number_input("Box X (Å)", value=80, min_value=40, max_value=200)
             with c2:
-                box_y = st.number_input("Box Y (A)", value=80, min_value=40, max_value=200)
+                box_y = st.number_input("Box Y (Å)", value=80, min_value=40, max_value=200)
 
         if st.button("Build Membrane", type="primary", use_container_width=True, key="build_lipid"):
             lipids = {k: v for k, v in lipid_values.items() if v[0] > 0 or v[1] > 0}
@@ -1179,7 +1179,7 @@ with tab_md:
                 st.markdown("**Lipid Membrane:**")
                 st.write(f"- Total Lipids: {props['total_lipids']}")
                 st.write(f"- Atoms: {props['n_atoms']:,}")
-                st.write(f"- Thickness: {props['thickness']} A")
+                st.write(f"- Thickness: {props['thickness']} Å")
 
         with col2:
             st.subheader("Simulation Parameters")
