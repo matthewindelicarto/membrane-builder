@@ -69,37 +69,14 @@ def calculate_box_dimensions(lipid_values):
     box_side = int(np.ceil(np.sqrt(required_area) / 5) * 5) + 5
     return max(40, min(200, box_side)), max(40, min(200, box_side))
 
-def render_lipid_3dmol(pdb_data, style="stick", molecule_info=None, animate=False):
+def render_lipid_3dmol(pdb_data, style="stick", molecule_info=None):
     mol_colors = {"water": "0x3498db", "ethanol": "0x9b59b6", "caffeine": "0x8B4513",
                   "aspirin": "0xe74c3c", "glucose": "0xf39c12", "custom": "0x1abc9c"}
     mol_sphere_js = ""
-    animation_js = ""
     if molecule_info:
         color = mol_colors.get(molecule_info['name'], "0x1abc9c")
         z_pos = molecule_info['z']
-        if animate:
-            animation_js = f"""
-            var sphereId = null; var startZ = 40; var endZ = -40; var bindingZ = {z_pos};
-            var duration = 4000; var startTime = Date.now(); var color = {color};
-            function animatePermeation() {{
-                var elapsed = Date.now() - startTime; var progress = elapsed / duration;
-                if (progress >= 1) {{
-                    if (sphereId !== null) viewer.removeShape(sphereId);
-                    sphereId = viewer.addSphere({{center: {{x: 0, y: 0, z: bindingZ}}, radius: 3, color: color, opacity: 0.9}});
-                    viewer.render(); return;
-                }}
-                var z;
-                if (progress < 0.3) {{ z = startZ - (startZ - bindingZ) * (progress / 0.3); }}
-                else if (progress < 0.7) {{ var membraneProgress = (progress - 0.3) / 0.4; z = bindingZ - (bindingZ * 2) * membraneProgress; }}
-                else {{ var exitProgress = (progress - 0.7) / 0.3; z = -bindingZ - (endZ + bindingZ) * exitProgress; }}
-                if (sphereId !== null) viewer.removeShape(sphereId);
-                sphereId = viewer.addSphere({{center: {{x: 0, y: 0, z: z}}, radius: 3, color: color, opacity: 0.9}});
-                viewer.render(); requestAnimationFrame(animatePermeation);
-            }}
-            animatePermeation();
-            """
-        else:
-            mol_sphere_js = f"viewer.addSphere({{center: {{x: 0, y: 0, z: {z_pos}}}, radius: 3, color: {color}, opacity: 0.9}});"
+        mol_sphere_js = f"viewer.addSphere({{center: {{x: 0, y: 0, z: {z_pos}}}, radius: 3, color: {color}, opacity: 0.9}});"
 
     style_js = {'stick': 'viewer.setStyle({}, {stick: {radius: 0.15}, sphere: {scale: 0.25}});',
                 'line': 'viewer.setStyle({}, {line: {linewidth: 1.5}});',
@@ -115,7 +92,6 @@ def render_lipid_3dmol(pdb_data, style="stick", molecule_info=None, animate=Fals
         {style_js}
         {mol_sphere_js}
         viewer.zoomTo(); viewer.render();
-        {animation_js}
     </script>
     """
     components.html(html, height=520)
@@ -220,7 +196,7 @@ def generate_tpu_polymer_chains(membrane, sparsa_frac, carbosil_frac):
                 chain_count += 1
     return atoms
 
-def render_tpu_3dmol(atoms, carbosil_frac, style, molecule_info=None, animate=False):
+def render_tpu_3dmol(atoms, carbosil_frac, style, molecule_info=None):
     pdb_lines = []
     for atom in atoms:
         line = f"ATOM  {atom['id']:5d} {atom['name']:4s} {atom['res_name']:3s}  {atom['res_id']:4d}    {atom['x']:8.3f}{atom['y']:8.3f}{atom['z']:8.3f}  1.00  0.00          {atom['element']:>2s}"
@@ -252,32 +228,10 @@ def render_tpu_3dmol(atoms, carbosil_frac, style, molecule_info=None, animate=Fa
         """
 
     mol_colors = {"phenol": "0xe74c3c", "m-cresol": "0x9b59b6", "glucose": "0xf39c12", "oxygen": "0x3498db"}
-    mol_sphere_js, animation_js = "", ""
+    mol_sphere_js = ""
     if molecule_info:
         color = mol_colors.get(molecule_info['name'], "0x1abc9c")
-        if animate:
-            animation_js = f"""
-            var sphereId = null; var startZ = 25; var endZ = -25; var duration = 4000;
-            var startTime = Date.now(); var color = {color};
-            function animatePermeation() {{
-                var elapsed = Date.now() - startTime; var progress = elapsed / duration;
-                if (progress >= 1) {{
-                    if (sphereId !== null) viewer.removeShape(sphereId);
-                    sphereId = viewer.addSphere({{center: {{x: 0, y: 0, z: 0}}, radius: 2.5, color: color, opacity: 0.95}});
-                    viewer.render(); return;
-                }}
-                var z;
-                if (progress < 0.3) {{ z = startZ - startZ * (progress / 0.3); }}
-                else if (progress < 0.7) {{ var membraneProgress = (progress - 0.3) / 0.4; z = 0 - (endZ * 0.5) * membraneProgress; }}
-                else {{ var exitProgress = (progress - 0.7) / 0.3; z = endZ * 0.5 - (endZ * 0.5) * exitProgress; }}
-                if (sphereId !== null) viewer.removeShape(sphereId);
-                sphereId = viewer.addSphere({{center: {{x: 0, y: 0, z: z}}, radius: 2.5, color: color, opacity: 0.95}});
-                viewer.render(); requestAnimationFrame(animatePermeation);
-            }}
-            animatePermeation();
-            """
-        else:
-            mol_sphere_js = f"viewer.addSphere({{center: {{x: 0, y: 0, z: 0}}, radius: 2.5, color: {color}, opacity: 0.95}});"
+        mol_sphere_js = f"viewer.addSphere({{center: {{x: 0, y: 0, z: 0}}, radius: 2.5, color: {color}, opacity: 0.95}});"
 
     box_x, box_y, box_z = 40, 40, 15
     html = f"""
@@ -306,7 +260,6 @@ def render_tpu_3dmol(atoms, carbosil_frac, style, molecule_info=None, animate=Fa
         viewer.zoomTo(); viewer.zoom(0.5);
         viewer.rotate(20, {{x: 1, y: 0, z: 0}}); viewer.rotate(-15, {{x: 0, y: 1, z: 0}});
         viewer.render();
-        {animation_js}
     </script>
     """
     components.html(html, height=520)
@@ -321,10 +274,10 @@ def generate_md_structure(composition, box_size=50, n_chains=20, membrane_type="
     if membrane_type == "tpu":
         total = sum(composition.values())
         if total == 0: total = 1
-        s1 = composition.get('Sparsa1', 0) / total
-        s2 = composition.get('Sparsa2', 0) / total
-        c1 = composition.get('Carbosil1', 0) / total
-        c2 = composition.get('Carbosil2', 0) / total
+        s1 = composition.get('Sparsa_27G26', 0) / total
+        s2 = composition.get('Sparsa_30G25', 0) / total
+        c1 = composition.get('Carbosil_2080A', 0) / total
+        c2 = composition.get('Carbosil_2090A', 0) / total
 
     bx = box_size
 
@@ -390,16 +343,13 @@ def generate_md_structure(composition, box_size=50, n_chains=20, membrane_type="
                 res_id += 1
                 if np.random.random() < 0.3: direction = random_dir()
     else:
-        # Lipid membrane - simplified coarse-grained representation
         for lip_name, count in composition.items():
             for _ in range(count):
                 x = np.random.uniform(-bx/2 + 3, bx/2 - 3)
                 y = np.random.uniform(-bx/2 + 3, bx/2 - 3)
                 z = np.random.uniform(-5, 5)
-                # Head group
                 add_atom("P", x, y, z + 10, lip_name[:3], -1.0)
                 add_atom("N", x + 1, y, z + 12, lip_name[:3], 1.0)
-                # Tails
                 prev = None
                 for t in range(8):
                     a = add_atom("C", x, y + t*0.5, z + 8 - t*2, lip_name[:3])
@@ -707,7 +657,7 @@ with tab_lipid:
                     try:
                         config = MembraneConfig.create_simple(lipids=lipids, box_size=(float(box_x), float(box_y), 120.0))
                         builder = MembraneBuilder(seed=12345)
-                        membrane = builder.build(config, use_templates=True, templates_dir="Lipids")
+                        membrane = builder.build(config, use_templates=True, templates_dir="lipids")
                         st.session_state.pdb_data = membrane.to_pdb_string()
                         st.session_state.membrane_props = {
                             'thickness': round(membrane.properties.thickness, 1),
@@ -783,14 +733,10 @@ with tab_lipid:
     with col2:
         st.subheader("3D Viewer")
         if st.session_state.pdb_data:
-            c1, c2 = st.columns([3, 1])
-            with c1:
-                style = st.radio("Style", ["stick", "line", "sphere"], horizontal=True, key="lipid_style")
-            with c2:
-                animate = st.button("Animate", use_container_width=True, key="lipid_animate") if st.session_state.perm_result else False
+            style = st.radio("Style", ["stick", "line", "sphere"], horizontal=True, key="lipid_style")
 
             mol_info = {'name': st.session_state.perm_result['mol_name'], 'z': st.session_state.perm_result['binding_position']} if st.session_state.perm_result else None
-            render_lipid_3dmol(st.session_state.pdb_data, style, mol_info, animate)
+            render_lipid_3dmol(st.session_state.pdb_data, style, mol_info)
 
             if st.session_state.membrane_props:
                 st.markdown("**Membrane Properties**")
@@ -831,16 +777,16 @@ with tab_tpu:
         st.markdown("**Sparsa Polymers (%)**")
         c1, c2 = st.columns(2)
         with c1:
-            sparsa1_pct = st.number_input("Sparsa 1", value=30, min_value=0, max_value=100, key="tpu_sparsa1")
+            sparsa1_pct = st.number_input("Sparsa 1 (27G26)", value=30, min_value=0, max_value=100, key="tpu_sparsa1")
         with c2:
-            sparsa2_pct = st.number_input("Sparsa 2", value=0, min_value=0, max_value=100, key="tpu_sparsa2")
+            sparsa2_pct = st.number_input("Sparsa 2 (30G25)", value=0, min_value=0, max_value=100, key="tpu_sparsa2")
 
         st.markdown("**Carbosil Polymers (%)**")
         c3, c4 = st.columns(2)
         with c3:
-            carbosil1_pct = st.number_input("Carbosil 1", value=70, min_value=0, max_value=100, key="tpu_carbosil1")
+            carbosil1_pct = st.number_input("Carbosil 1 (2080A)", value=70, min_value=0, max_value=100, key="tpu_carbosil1")
         with c4:
-            carbosil2_pct = st.number_input("Carbosil 2", value=0, min_value=0, max_value=100, key="tpu_carbosil2")
+            carbosil2_pct = st.number_input("Carbosil 2 (2090A)", value=0, min_value=0, max_value=100, key="tpu_carbosil2")
 
         total = sparsa1_pct + sparsa2_pct + carbosil1_pct + carbosil2_pct
         if total > 0:
@@ -857,8 +803,8 @@ with tab_tpu:
             with st.spinner("Building membrane..."):
                 try:
                     config = TPUMembraneConfig(
-                        polymers={"Sparsa1": sparsa1_frac, "Sparsa2": sparsa2_frac,
-                                  "Carbosil1": carbosil1_frac, "Carbosil2": carbosil2_frac},
+                        polymers={"Sparsa_27G26": sparsa1_frac, "Sparsa_30G25": sparsa2_frac,
+                                  "Carbosil_2080A": carbosil1_frac, "Carbosil_2090A": carbosil2_frac},
                         thickness=float(thickness)
                     )
                     builder = TPUMembraneBuilder(seed=12345)
@@ -870,8 +816,8 @@ with tab_tpu:
 
         if st.session_state.tpu_membrane:
             report = ["TPU Membrane Report", "=" * 40,
-                     f"Sparsa 1: {sparsa1_frac*100:.1f}%", f"Sparsa 2: {sparsa2_frac*100:.1f}%",
-                     f"Carbosil 1: {carbosil1_frac*100:.1f}%", f"Carbosil 2: {carbosil2_frac*100:.1f}%",
+                     f"Sparsa 1 (27G26): {sparsa1_frac*100:.1f}%", f"Sparsa 2 (30G25): {sparsa2_frac*100:.1f}%",
+                     f"Carbosil 1 (2080A): {carbosil1_frac*100:.1f}%", f"Carbosil 2 (2090A): {carbosil2_frac*100:.1f}%",
                      f"Thickness: {thickness} um"]
             props = st.session_state.tpu_membrane.properties
             report.extend([f"Density: {props.density:.3f} g/cm3", f"Water uptake: {props.water_uptake:.1f}%"])
@@ -906,20 +852,16 @@ with tab_tpu:
             membrane = st.session_state.tpu_membrane
             props = membrane.properties
 
-            c1, c2 = st.columns([3, 1])
-            with c1:
-                tpu_style = st.radio("Style", ["stick", "sphere", "line"], horizontal=True, key="tpu_style")
-            with c2:
-                tpu_animate = st.button("Animate", use_container_width=True, key="tpu_animate") if st.session_state.tpu_perm_result else False
+            tpu_style = st.radio("Style", ["stick", "sphere", "line"], horizontal=True, key="tpu_style")
 
             mol_info = {'name': st.session_state.tpu_perm_result['mol_name']} if st.session_state.tpu_perm_result else None
 
             comp = membrane.composition
-            sparsa_frac = comp.get("Sparsa1", 0) + comp.get("Sparsa2", 0)
-            carbosil_frac = comp.get("Carbosil1", 0) + comp.get("Carbosil2", 0)
+            sparsa_frac = comp.get("Sparsa_27G26", 0) + comp.get("Sparsa_30G25", 0)
+            carbosil_frac = comp.get("Carbosil_2080A", 0) + comp.get("Carbosil_2090A", 0)
 
             atoms = generate_tpu_polymer_chains(membrane, sparsa_frac, carbosil_frac)
-            render_tpu_3dmol(atoms, carbosil_frac, tpu_style, mol_info, tpu_animate)
+            render_tpu_3dmol(atoms, carbosil_frac, tpu_style, mol_info)
 
             st.markdown("**Membrane Properties**")
             c1, c2, c3, c4, c5 = st.columns(5)
@@ -950,10 +892,10 @@ with tab_md:
     with col1:
         st.subheader("Composition")
         if md_type == "TPU":
-            md_s1 = st.slider("Sparsa 1 (%)", 0, 100, 30, key="md_s1")
-            md_s2 = st.slider("Sparsa 2 (%)", 0, 100, 0, key="md_s2")
-            md_c1 = st.slider("Carbosil 1 (%)", 0, 100, 70, key="md_c1")
-            md_c2 = st.slider("Carbosil 2 (%)", 0, 100, 0, key="md_c2")
+            md_s1 = st.slider("Sparsa 1 (27G26) %", 0, 100, 30, key="md_s1")
+            md_s2 = st.slider("Sparsa 2 (30G25) %", 0, 100, 0, key="md_s2")
+            md_c1 = st.slider("Carbosil 1 (2080A) %", 0, 100, 70, key="md_c1")
+            md_c2 = st.slider("Carbosil 2 (2090A) %", 0, 100, 0, key="md_c2")
             md_total = md_s1 + md_s2 + md_c1 + md_c2
             if md_total > 0:
                 st.caption(f"Normalized: S1={md_s1/md_total*100:.0f}%, S2={md_s2/md_total*100:.0f}%, C1={md_c1/md_total*100:.0f}%, C2={md_c2/md_total*100:.0f}%")
@@ -978,8 +920,8 @@ with tab_md:
             if md_type == "TPU":
                 md_total = md_s1 + md_s2 + md_c1 + md_c2
                 if md_total == 0: md_total = 1
-                composition = {'Sparsa1': md_s1/md_total, 'Sparsa2': md_s2/md_total,
-                              'Carbosil1': md_c1/md_total, 'Carbosil2': md_c2/md_total}
+                composition = {'Sparsa_27G26': md_s1/md_total, 'Sparsa_30G25': md_s2/md_total,
+                              'Carbosil_2080A': md_c1/md_total, 'Carbosil_2090A': md_c2/md_total}
                 membrane_type = "tpu"
             else:
                 composition = {'POPC': md_popc, 'POPE': md_pope, 'CHOL': md_chol, 'POPS': md_pops}
