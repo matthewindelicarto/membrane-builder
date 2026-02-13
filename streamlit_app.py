@@ -14,7 +14,8 @@ from tpu_builder import (
 
 st.set_page_config(
     page_title="Membrane Builder",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="collapsed"
 )
 
 # Create main tabs
